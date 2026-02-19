@@ -5,13 +5,13 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 3. Copy Requirements
-COPY requirements.txt .
+COPY python/requirements.txt .
 
 # 4. Install Dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Copy Source Code
-COPY . .
+COPY python/ .
 
 # 6. Expose Port
 EXPOSE 5001
