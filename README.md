@@ -1,152 +1,94 @@
-# 🚀 Project Rolling – AWS Resource Dashboard
+# 🚀 Project Rolling – AWS Resource Dashboard & CI/CD Pipeline
 
-A simple **Flask web app** running on an **EC2 instance (Amazon Linux 2023)** that uses **Boto3** to fetch and display live information about your AWS resources:
-
-- EC2 Instances  
-- VPCs  
-- Load Balancers (ALB/NLB)  
-- Available (owned) AMIs  
+A comprehensive DevOps project featuring a **Flask web application** that monitors AWS resources, integrated with a full **CI/CD Pipeline** using Jenkins, Docker, and Security scanning tools.
 
 ---
 
-## 📦 Features
+## 🛠️ Tech Stack & DevOps Tools
 
-- Displays **running EC2 instances** including their public IPs, types, and states.  
-- Lists all **VPCs** in your AWS region.  
-- Shows **Application / Network Load Balancers** and their DNS names.  
-- Displays **AMIs** owned by your AWS account.  
-
----
-
-## 🧠 Technologies Used
-
-- **Python 3**
-- **Flask** (for the web framework)
-- **Boto3** (AWS SDK for Python)
-- **Amazon EC2 (Amazon Linux 2023)**
+- **Application:** Python 3, Flask, Boto3 (AWS SDK).
+- **CI/CD Platform:** Jenkins (Pipeline as Code).
+- **Containerization:** Docker.
+- **Security Scanning:** Trivy (FS & Vulnerability scanning).
+- **Static Code Analysis:** Flake8 (Linting).
+- **Infrastructure:** Terraform (Planned IaC).
+- **Registry:** Docker Hub.
 
 ---
 
-## ⚙️ Setup Instructions
+## 🏗️ Project Structure
 
-### 1. Clone this repository
+The repository is organized according to industry best practices, separating application logic from infrastructure and configuration:
 
-```bash
-git clone https://github.com/Yuvalvos/project-rolling.git
-cd project-rolling
-```
-
-### 2. (Optional) Create a virtual environment
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-or manually:
-```bash
-pip install flask boto3
-```
-
----
-
-## 🔐 AWS Credentials Setup
-
-The app uses environment variables for AWS credentials.
-
-Set them like this:
-
-### On Mac/Linux:
-```bash
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-export AWS_REGION=eu-north-1
-```
-
-### On Windows (CMD):
-```bash
-set AWS_ACCESS_KEY_ID=your_access_key
-set AWS_SECRET_ACCESS_KEY=your_secret_key
-set AWS_REGION=eu-north-1
-```
-
-> ⚠️ **Never hardcode your AWS keys in the code!**
-
----
-
-## 🏃 Running the Application
-
-Run the Flask app:
-```bash
-python3 app.py
-```
-
-Then open your browser at:
-
-👉 `http://<your-ec2-public-ip>:5001`
-
----
-
-## 🖥️ Output Example
-
-The web app will show tables listing:
-- **Running EC2 Instances**
-- **VPCs**
-- **Load Balancers**
-- **Available AMIs**
-
-Example view:
-
-| ID | State | Type | Public IP |
-|----|--------|------|-----------|
-| i-015d8204df23b7888 | running | c7i-flex.large | 13.62.19.154 |
-
----
-
-## 🧾 Project Structure
-
-```
+```text
 project-rolling/
 │
-├── app.py
-├── requirements.txt
-├── .gitignore
-└── README.md
-```
+├── python/                 # Application source code
+│   ├── app.py              # Main Flask application (Listening on Port 5001)
+│   └── requirements.txt    # Python dependencies
+│
+├── terraform/              # Infrastructure as Code (IaC) configurations
+│
+├── docs/                   # Documentation and project screenshots
+│   └── pipeline-success.png # Jenkins pipeline success screenshot
+│
+├── Dockerfile              # Docker image configuration (Root directory)
+├── Jenkinsfile             # Declarative Pipeline configuration (Root directory)
+├── .gitignore              # Git ignore file
+└── README.md               # Project documentation
+🔄 CI/CD Pipeline Workflow
+The Jenkins pipeline is defined in a declarative Jenkinsfile and automatically triggers on every push to the main branch:
 
----
+Checkout SCM: Pulls the latest code from the GitHub repository.
 
-## ✅ Requirements
+Quality & Security (Parallel Execution):
 
-- Python 3.7+
-- AWS account with the following permissions:
-  - `ec2:DescribeInstances`
-  - `ec2:DescribeVpcs`
-  - `ec2:DescribeImages`
-  - `elasticloadbalancing:DescribeLoadBalancers`
+Linting: Runs Flake8 on the python/ directory to ensure PEP8 compliance and code quality.
 
----
+Security Scan: Uses Trivy to scan the filesystem for vulnerabilities and exposed secrets.
 
-## 🖼️ Screenshots
+Build Docker Image: Builds a production-ready Docker image using the root Dockerfile, ensuring the application and dependencies are correctly packaged.
 
-**Running on EC2**
-![EC2 Instance](aws/ec2_instance.png)
+Push to Docker Hub: Authenticates, tags, and pushes the final image to the registry: yuvalv1288/project-rolling-app:latest.
 
-**Web App Output**
-![App Output](aws/web_output.png)
+Pipeline Success View:
 
----
+📦 Containerization & Deployment
+To run the application locally or on a server using the Docker image:
 
-## 📜 License
+Bash
+# 1. Pull the image from Docker Hub
+docker pull yuvalv1288/project-rolling-app:latest
 
-This project is open-source and free to use.  
+# 2. Run the container
+# Note: Port 5001 is used to avoid conflicts
+docker run -d -p 5001:5001 \
+  -e AWS_ACCESS_KEY_ID=your_access_key \
+  -e AWS_SECRET_ACCESS_KEY=your_secret_key \
+  -e AWS_REGION=eu-north-1 \
+  yuvalv1288/project-rolling-app:latest
+🔐 AWS Credentials Setup
+The application requires AWS credentials with programmatic access and the following permissions:
 
----
+ec2:DescribeInstances
 
-## 🙋 Support
+ec2:DescribeVpcs
 
-Created by **Yuval Vos**  
-Feel free to open issues or suggestions in this repository.
+elasticloadbalancing:DescribeLoadBalancers
+
+ec2:DescribeImages
+
+Security Note: In the Jenkins pipeline, these credentials are securely managed using the Jenkins Credentials Store and are never hardcoded in the source.
+
+🖥️ Application Features
+The web interface provides a real-time dashboard for AWS resources:
+
+EC2 Dashboard: List of instances, their types, public IPs, and current states.
+
+Network Overview: Displays VPCs and subnets within the configured region.
+
+Load Balancers: Lists ALBs/NLBs along with their DNS names.
+
+AMI Management: Displays Amazon Machine Images owned by the account.
+
+Developed by Yuval Vos DevOps Project Rolling
